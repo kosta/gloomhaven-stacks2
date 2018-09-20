@@ -7,6 +7,7 @@ extern crate yew;
 
 use yew::prelude::*;
 use yew::format::Json;
+use yew::services::console::{ConsoleService};
 use yew::services::storage::{Area, StorageService};
 
 type Card = u16;
@@ -48,6 +49,7 @@ struct Stacks {
 
 struct Model {
     storage: StorageService,
+    console: ConsoleService,
     stacks: Stacks,
 }
 
@@ -64,17 +66,25 @@ impl Component<Context> for Model {
     type Properties = ();
 
     fn create(_: Self::Properties, context: &mut Env<Context, Self>) -> Self {
+        let mut console = ConsoleService::new();
         let mut storage = StorageService::new(Area::Local);
-        if let Json(Ok(stacks)) = storage.restore(KEY) {
-            Model {
-                storage,
-                stacks,
-            }
-        } else {
-            Model {
-                storage,
-                stacks: Stacks::default(),
-            }
+        let res = storage.restore(KEY);
+        match res {
+            Json(Ok(stacks)) => {
+                Model {
+                    console,
+                    storage,
+                    stacks,
+                }
+            },
+            Json(Err(e)) => {
+                console.log(&format!("Error deserializing localStorage: {}", e));
+                Model {
+                    console,
+                    storage,
+                    stacks: Stacks::default(),
+                }
+            },
         }
     }
 
