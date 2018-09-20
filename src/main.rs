@@ -13,9 +13,17 @@ use yew::services::storage::{Area, StorageService};
 type Card = u16;
 type Context = ();
 
+//TODO: Refactor into enum! :)
 #[derive(Debug, Deserialize, Serialize)]
-enum History{
-
+struct History{
+    #[serde(skip_serializing_if = "Option::is_none")]
+    event: Option<Card>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    action: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    card: Option<Card>,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    cards: Vec<Card>,
 }
 
 #[derive(Debug, Default, Deserialize, Serialize)]
@@ -38,6 +46,7 @@ struct List {
 }
 
 #[derive(Debug, Default, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
 struct Stacks {
     city_events: EventPile,
     road_events: EventPile,
